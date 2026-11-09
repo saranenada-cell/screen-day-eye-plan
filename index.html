@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Screen-Day Eye Plan | Daily Screen Break & Drop Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen p-4 max-w-md mx-auto">
+
+  <!-- Header -->
+  <header class="py-4 text-center">
+    <h1 class="text-2xl font-bold text-sky-900">My Screen-Day Eye Plan</h1>
+    <p class="text-sm text-slate-600 mt-1">Daily protection for screen-heavy eyes</p>
+  </header>
+
+  <!-- Drop Tracker Section -->
+  <section class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-4">
+    <div class="flex justify-between items-center mb-3">
+      <h2 class="font-semibold text-slate-900">Today's Drop Schedule</h2>
+      <button onclick="resetDrops()" class="text-xs text-sky-600 hover:underline">Reset</button>
+    </div>
+    <div class="space-y-2 text-sm" id="drop-list">
+      <label class="flex items-center gap-3 p-2 bg-slate-50 rounded-lg cursor-pointer">
+        <input type="checkbox" id="drop-1" onchange="toggleDrop(1)" class="w-5 h-5 accent-sky-600 rounded">
+        <span><strong>Morning:</strong> Before opening your screen</span>
+      </label>
+      <label class="flex items-center gap-3 p-2 bg-slate-50 rounded-lg cursor-pointer">
+        <input type="checkbox" id="drop-2" onchange="toggleDrop(2)" class="w-5 h-5 accent-sky-600 rounded">
+        <span><strong>Lunch:</strong> Midday screen reset</span>
+      </label>
+      <label class="flex items-center gap-3 p-2 bg-slate-50 rounded-lg cursor-pointer">
+        <input type="checkbox" id="drop-3" onchange="toggleDrop(3)" class="w-5 h-5 accent-sky-600 rounded">
+        <span><strong>3:00 PM:</strong> Beat the afternoon burn</span>
+      </label>
+      <label class="flex items-center gap-3 p-2 bg-slate-50 rounded-lg cursor-pointer">
+        <input type="checkbox" id="drop-4" onchange="toggleDrop(4)" class="w-5 h-5 accent-sky-600 rounded">
+        <span><strong>Evening:</strong> Night-time wind-down</span>
+      </label>
+    </div>
+  </section>
+
+  <!-- 20-20-20 Interactive Timer -->
+  <section class="bg-sky-50 border border-sky-200 p-4 rounded-xl text-center mb-4">
+    <h2 class="font-semibold text-sky-900 mb-1">20-20-20 Blink Coach</h2>
+    <p class="text-xs text-sky-700 mb-3">Rest your eye focus and refresh your tear film.</p>
+    <div id="timer-display" class="text-3xl font-mono font-bold text-sky-800 mb-2">20s</div>
+    <div id="timer-instruction" class="text-xs font-medium text-slate-700 min-h-[32px] mb-3">
+      Ready? Tap below to start your focus break.
+    </div>
+    <button id="start-btn" onclick="startBlinkTimer()" class="w-full py-2.5 bg-sky-600 text-white rounded-lg font-medium text-sm hover:bg-sky-700 transition">
+      Start 20s Break
+    </button>
+  </section>
+
+  <!-- Optometry Prep Modal Trigger -->
+  <details class="bg-white p-4 rounded-xl border border-slate-200 text-sm">
+    <summary class="font-semibold text-slate-900 cursor-pointer list-none flex justify-between items-center">
+      <span>Seeing an Eye Doctor or LASIK Surgeon?</span>
+      <span class="text-sky-600 text-xs">View Checklist ↓</span>
+    </summary>
+    <ul class="list-disc pl-5 mt-3 space-y-1 text-slate-600 text-xs">
+      <li>Mention your daily screen hours (~8–10 hrs/day).</li>
+      <li>Let them know your eyes water or blur late in the day.</li>
+      <li>Tell them you're using scheduled, preservative-free drops.</li>
+      <li>Mention any past contact lens discomfort.</li>
+    </ul>
+  </details>
+
+  <script>
+    // Persistent Drop Tracker using LocalStorage
+    function loadDrops() {
+      const today = new Date().toDateString();
+      if (localStorage.getItem('drop_date') !== today) {
+        localStorage.setItem('drop_date', today);
+        [1,2,3,4].forEach(i => localStorage.removeItem('drop_' + i));
+      }
+      [1,2,3,4].forEach(i => {
+        const checked = localStorage.getItem('drop_' + i) === 'true';
+        document.getElementById('drop-' + i).checked = checked;
+      });
+    }
+
+    function toggleDrop(num) {
+      const isChecked = document.getElementById('drop-' + num).checked;
+      localStorage.setItem('drop_' + num, isChecked);
+    }
+
+    function resetDrops() {
+      [1,2,3,4].forEach(i => {
+        localStorage.removeItem('drop_' + i);
+        document.getElementById('drop-' + i).checked = false;
+      });
+    }
+
+    // 20-20-20 Timer with Guidance
+    let interval = null;
+    function startBlinkTimer() {
+      if (interval) clearInterval(interval);
+      let timeLeft = 20;
+      const display = document.getElementById('timer-display');
+      const instruction = document.getElementById('timer-instruction');
+      const btn = document.getElementById('start-btn');
+      btn.disabled = true;
+      btn.classList.add('opacity-50');
+
+      interval = setInterval(() => {
+        timeLeft--;
+        display.innerText = timeLeft + 's';
+
+        if (timeLeft > 10) {
+          instruction.innerText = "Look out a window or focus on an object 20 feet away.";
+        } else if (timeLeft > 0) {
+          instruction.innerText = "Now do 3 slow, complete blinks (let eyelids touch).";
+        } else {
+          clearInterval(interval);
+          display.innerText = "Done!";
+          instruction.innerText = "Tear film refreshed! Back to work.";
+          btn.disabled = false;
+          btn.classList.remove('opacity-50');
+        }
+      }, 1000);
+    }
+
+    window.onload = loadDrops;
+  </script>
+</body>
+</html>
